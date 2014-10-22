@@ -3,7 +3,10 @@ var Immstruct = require('immstruct');
 var Component = require('omniscient');
 var d = React.DOM;
 
-var article = [ {
+Component.debug();
+
+var ARTICLES = [ {
+  id: 0,
   title: 'article 1',
   comments: [
   { id: 1, text: 'hello' },
@@ -17,7 +20,7 @@ var ArticlePage = React.createClass({
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.article) {
-      this.structure = Immstruct({ article: nextProps.article[0] });
+      this.structure = Immstruct(nextProps);
       this.structure.on('next-animation-frame', () => {
         this.setState({ version: ++this.state.version });
       });
@@ -26,9 +29,8 @@ var ArticlePage = React.createClass({
 
   render() {
     if (!this.structure) return null;
-    var article = window.articleCursor = this.structure.cursor().get('article');
-    var statics = { parent: this.props.parent };
-    return Article(`AP-${article.get('id')}`, article, statics);
+    var article = this.structure.cursor().get('article');
+    return Article(`AP-${article.get('id')}`, article);
   }
 });
 
@@ -44,8 +46,7 @@ var Article = Component('Article', (article, statics) => {
 });
 
 var Comment = Component('Comment', function(comment) {
-  var changeComment = (e) => {
-    e.stopPropagation();
+  var changeComment = () => {
     comment.update('text', text => text + ' ok');
   };
 
@@ -59,5 +60,5 @@ React.renderComponent(ArticlePage(), document.body);
 
 // simulate async props coming in later
 setTimeout(function() {
-  React.renderComponent(ArticlePage({ article: article }), document.body);
+  React.renderComponent(ArticlePage({ article: ARTICLES[0] }), document.body);
 }, 1000);
